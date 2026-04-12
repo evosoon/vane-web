@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg0: #F0F2F5;
+  --bg1: #FFFFFF;
+  --bg2: #F5F6F8;
+  --bg3: #EAECEF;
+  --b1: #E2E5EA;
+  --b2: #CDD0D8;
+  --t1: #141921;
+  --t2: #3D4554;
+  --t3: #7B8496;
+  --t4: #B8BDC8;
+
+  --blue: #2563EB;
+  --blue-l: #EFF4FF;
+  --blue-m: rgba(37,99,235,.12);
+  --blue-d: #1D4ED8;
+  --green: #059669;
+  --green-l: #ECFDF5;
+  --orange: #D97706;
+  --orange-l: #FFFBEB;
+  --purple: #7C3AED;
+  --purple-l: #F5F3FF;
+  --red: #DC2626;
+  --red-l: #FEF2F2;
+
+  --rise: #E5334B;
+  --fall: #0DB070;
+  --rise-l: #FEF0F2;
+  --fall-l: #EBF8F2;
+
+  --ss: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --sm: 0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --sl: 0 12px 40px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+
+  --rs: 8px;
+  --rm: 12px;
+  --rl: 16px;
+  --sw: 68px;
+  --hh: 48px;
+}
+
+.dark {
+  --bg0: #0E1117;
+  --bg1: #161B26;
+  --bg2: #1C2230;
+  --bg3: #232D3F;
+  --b1: #2A3347;
+  --b2: #374155;
+  --t1: #F0F4FF;
+  --t2: #9AABCA;
+  --t3: #6678A0;
+  --t4: #3D4F6E;
+  --blue-l: rgba(37,99,235,.15);
+  --blue-m: rgba(37,99,235,.18);
+  --green-l: rgba(5,150,105,.15);
+  --orange-l: rgba(217,119,6,.12);
+  --purple-l: rgba(124,58,237,.15);
+  --red-l: rgba(220,38,38,.12);
+  --rise-l: rgba(229,51,75,.12);
+  --fall-l: rgba(13,176,112,.12);
+  --ss: 0 1px 3px rgba(0,0,0,.2);
+  --sm: 0 4px 16px rgba(0,0,0,.3);
+  --sl: 0 12px 40px rgba(0,0,0,.4);
+}
+
+/* ===== TAILWIND THEME ===== */
+@theme {
+  /* Colors */
+  --color-bg-0: var(--bg0);
+  --color-bg-1: var(--bg1);
+  --color-bg-2: var(--bg2);
+  --color-bg-3: var(--bg3);
+
+  --color-border-1: var(--b1);
+  --color-border-2: var(--b2);
+
+  --color-text-1: var(--t1);
+  --color-text-2: var(--t2);
+  --color-text-3: var(--t3);
+  --color-text-4: var(--t4);
+
+  --color-rise: var(--rise);
+  --color-rise-light: var(--rise-l);
+  --color-fall: var(--fall);
+  --color-fall-light: var(--fall-l);
+
+  --color-brand-blue: var(--blue);
+  --color-brand-blue-light: var(--blue-l);
+  --color-brand-blue-medium: var(--blue-m);
+  --color-brand-blue-dark: var(--blue-d);
+  --color-brand-green: var(--green);
+  --color-brand-green-light: var(--green-l);
+  --color-brand-orange: var(--orange);
+  --color-brand-orange-light: var(--orange-l);
+  --color-brand-purple: var(--purple);
+  --color-brand-purple-light: var(--purple-l);
+  --color-brand-red: var(--red);
+  --color-brand-red-light: var(--red-l);
+
+  /* Shadows */
+  --shadow-ss: var(--ss);
+  --shadow-sm: var(--sm);
+  --shadow-sl: var(--sl);
+
+  /* Border radius */
+  --radius-sm: var(--rs);
+  --radius-md: var(--rm);
+  --radius-lg: var(--rl);
+
+  /* Spacing */
+  --spacing-sidebar: var(--sw);
+  --spacing-header: var(--hh);
+
+  /* Timing */
+  --ease-vane: cubic-bezier(.25,.1,.25,1);
+  --duration-vane: 160ms;
+}
+
+/* ===== BASE ===== */
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg0);
+  color: var(--t1);
+  font-family: var(--font-sans);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tdot {
+  0%, 80%, 100% { opacity: .25; transform: scale(.7); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.2s ease;
+}
+
+.animate-dot {
+  animation: tdot 1.4s infinite ease-in-out;
+}
