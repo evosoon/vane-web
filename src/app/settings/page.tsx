@@ -55,7 +55,7 @@ export default function SettingsPage() {
           <CardHeader title="快捷键" icon={<Keyboard className="w-3 h-3" />} />
           <CardBody>
             <div className="space-y-2 text-xs">
-              {[['搜索股票', '⌘K'], ['切换主题', '⌘T'], ['刷新数据', '⌘R']].map(([label, key]) => (
+              {[['搜索股票', '⌘K'], ['切换主题', '⌘.'], ['刷新数据', '⌘R']].map(([label, key]) => (
                 <div key={label} className="flex items-center justify-between py-1">
                   <span className="text-text-2">{label}</span>
                   <kbd className="px-2 py-0.5 bg-bg-2 border border-border-1 rounded text-[10px] font-mono text-text-3">{key}</kbd>

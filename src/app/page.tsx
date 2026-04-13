@@ -11,12 +11,13 @@ import { BarChart3, TrendingUp } from 'lucide-react'
 import { useQuote } from '@/hooks/use-quote'
 import { useKline } from '@/hooks/use-kline'
 import { useNews } from '@/hooks/use-news'
+import { useMarketStore } from '@/stores/market'
 
 export default function Home() {
   const [period, setPeriod] = useState('day')
   const [adjust, setAdjust] = useState('qfq')
 
-  const symbol = 'sh600519'
+  const symbol = useMarketStore((s) => s.symbol)
   const quote = useQuote(symbol)
   const kline = useKline(symbol, period, adjust)
   const news = useNews()

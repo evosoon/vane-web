@@ -1,28 +1,40 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   TrendingUp,
   Activity,
   MessageSquare,
   Search,
   RefreshCw,
-  Sun,
-  Moon,
   Settings,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DataSourceBadge } from '@/components/ui/DataSourceBadge'
+import { useMarketStore } from '@/stores/market'
+import { useApiHealth } from '@/hooks/use-api-health'
 
 const NAV_ITEMS = [
   { href: '/', icon: TrendingUp, label: '个股' },
   { href: '/emotion', icon: Activity, label: '情绪' },
   { href: '/chat', icon: MessageSquare, label: '问股' },
 ]
+
+function parseSymbol(input: string): string | null {
+  const trimmed = input.trim()
+  // sh600519 / sz000001 format
+  if (/^(sh|sz)\d{6}$/i.test(trimmed)) return trimmed.toLowerCase()
+  // bare 6-digit code
+  if (/^\d{6}$/.test(trimmed)) {
+    if (trimmed.startsWith('6')) return `sh${trimmed}`
+    if (trimmed.startsWith('0') || trimmed.startsWith('3')) return `sz${trimmed}`
+  }
+  return null
+}
 
 function MarketBadge() {
   const [status, setStatus] = useState({ label: '--', open: false })
@@ -50,7 +62,7 @@ function MarketBadge() {
   return (
     <div
       className={cn(
-        'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold transition-all',
+        'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold whitespace-nowrap transition-all',
         status.open ? 'text-fall bg-fall-light' : 'text-text-3 bg-bg-2'
       )}
       suppressHydrationWarning
@@ -63,36 +75,82 @@ function MarketBadge() {
 
 export function Dock() {
   const pathname = usePathname()
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const queryClient = useQueryClient()
   const [searchOpen, setSearchOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchAreaRef = useRef<HTMLDivElement>(null)
+  const setSymbol = useMarketStore((s) => s.setSymbol)
+  const { isHealthy, isChecking } = useApiHealth()
+  const isMock = !isChecking && !isHealthy
 
-  useEffect(() => setMounted(true), [])
-
-  // ⌘K shortcut
+  // Global keyboard shortcuts: ⌘K (search), ⌘. (theme), ⌘R (refresh)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if (!(e.metaKey || e.ctrlKey)) return
+
+      if (e.key === 'k') {
         e.preventDefault()
         setSearchOpen((prev) => {
-          if (!prev) {
-            setTimeout(() => searchInputRef.current?.focus(), 50)
-          }
+          if (!prev) setTimeout(() => searchInputRef.current?.focus(), 50)
           return !prev
         })
       }
-      if (e.key === 'Escape' && searchOpen) {
+
+      if (e.key === '.') {
+        e.preventDefault()
+        setTheme(theme === 'dark' ? 'light' : 'dark')
+      }
+
+      if (e.key === 'r') {
+        e.preventDefault()
+        handleRefresh()
+      }
+    }
+
+    const escHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && searchOpen) setSearchOpen(false)
+    }
+
+    document.addEventListener('keydown', handler)
+    document.addEventListener('keydown', escHandler)
+    return () => {
+      document.removeEventListener('keydown', handler)
+      document.removeEventListener('keydown', escHandler)
+    }
+  }, [searchOpen, theme, setTheme])
+
+  // Click outside to close search
+  useEffect(() => {
+    if (!searchOpen) return
+    const handler = (e: MouseEvent) => {
+      if (searchAreaRef.current && !searchAreaRef.current.contains(e.target as Node)) {
         setSearchOpen(false)
       }
     }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
   }, [searchOpen])
+
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries()
+    setRefreshing(true)
+    setTimeout(() => setRefreshing(false), 600)
+  }, [queryClient])
 
   const closeSearch = useCallback(() => {
     setSearchOpen(false)
   }, [])
+
+  const handleSearchSubmit = useCallback((value: string) => {
+    const symbol = parseSymbol(value)
+    if (!symbol) return
+    setSymbol(symbol)
+    setSearchOpen(false)
+    if (pathname !== '/') router.push('/')
+  }, [setSymbol, pathname, router])
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
@@ -100,7 +158,8 @@ export function Dock() {
         className={cn(
           'flex items-center gap-1 px-2 py-1.5',
           'bg-bg-1/80 backdrop-blur-xl',
-          'border border-border-1 rounded-2xl',
+          isMock ? 'border border-brand-orange' : 'border border-border-1',
+          'rounded-2xl',
           'shadow-sl',
           'transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]',
         )}
@@ -138,7 +197,7 @@ export function Dock() {
         <div className="w-px h-5 bg-border-1 mx-1" />
 
         {/* Search */}
-        <div className="relative flex items-center">
+        <div className="relative flex items-center" ref={searchAreaRef}>
           <button
             onClick={() => {
               setSearchOpen(!searchOpen)
@@ -169,9 +228,14 @@ export function Dock() {
           >
             <input
               ref={searchInputRef}
-              placeholder="搜索股票代码或名称..."
+              placeholder="输入股票代码，回车跳转"
               className="w-full px-3 py-1.5 rounded-xl text-[11px] bg-bg-2 text-text-1 border border-border-1 outline-none placeholder:text-text-4 focus:border-brand-blue"
-              onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') closeSearch()
+                if (e.key === 'Enter') {
+                  handleSearchSubmit((e.target as HTMLInputElement).value)
+                }
+              }}
             />
           </div>
         </div>
@@ -179,26 +243,16 @@ export function Dock() {
         {/* Divider */}
         <div className="w-px h-5 bg-border-1 mx-1" />
 
-        {/* Market status + Data source */}
+        {/* Market status */}
         <MarketBadge />
-        <DataSourceBadge />
 
         {/* Refresh */}
-        <button className="p-1.5 rounded-xl text-text-3 hover:text-text-1 hover:bg-bg-2 transition-all" title="刷新">
-          <RefreshCw className="w-4 h-4" strokeWidth={1.8} />
-        </button>
-
-        {/* Theme toggle */}
         <button
           className="p-1.5 rounded-xl text-text-3 hover:text-text-1 hover:bg-bg-2 transition-all"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          title="切换主题"
+          title="刷新数据 ⌘R"
+          onClick={handleRefresh}
         >
-          {mounted && (theme === 'dark' ? (
-            <Sun className="w-4 h-4" strokeWidth={1.8} />
-          ) : (
-            <Moon className="w-4 h-4" strokeWidth={1.8} />
-          ))}
+          <RefreshCw className={cn('w-4 h-4 transition-transform', refreshing && 'animate-spin')} strokeWidth={1.8} />
         </button>
 
         {/* Settings */}
