@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { Search, RefreshCw, Sun, Moon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge'
 
 const PAGE_TITLES: Record<string, string> = {
   '/': '首页',
@@ -86,6 +87,7 @@ export function AppHeader() {
       {/* Actions */}
       <div className="flex items-center gap-[6px]">
         <MarketBadge />
+        <DataSourceBadge />
         <button
           className="w-7 h-7 flex items-center justify-center rounded-sm cursor-pointer text-text-3 border-none bg-transparent transition-all duration-vane hover:bg-bg-2 hover:text-text-1"
           title="刷新"

@@ -3,19 +3,10 @@
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { ChangeBadge } from '@/components/ui/ChangeBadge'
 import { cn } from '@/lib/utils'
-
-interface LimitStock {
-  symbol: string
-  name: string
-  price: number
-  changePercent: number
-  limitTimes: number
-  firstLimitTime: string
-  reason: string
-}
+import type { LimitStockDisplay } from '@/hooks/use-limit-pool'
 
 interface LimitPoolTableProps {
-  stocks: LimitStock[]
+  stocks: LimitStockDisplay[]
   type: 'up' | 'down'
 }
 
@@ -34,13 +25,12 @@ export function LimitPoolTable({ stocks, type }: LimitPoolTableProps) {
                 <th className="text-left px-3 py-2 font-semibold">名称</th>
                 <th className="text-right px-3 py-2 font-semibold">价格</th>
                 <th className="text-right px-3 py-2 font-semibold">涨跌幅</th>
-                <th className="text-center px-3 py-2 font-semibold">连板</th>
-                <th className="text-left px-3 py-2 font-semibold">首次封板</th>
-                <th className="text-left px-3 py-2 font-semibold">原因</th>
+                <th className="text-right px-3 py-2 font-semibold">成交额</th>
+                <th className="text-right px-3 py-2 font-semibold">换手率</th>
               </tr>
             </thead>
             <tbody>
-              {stocks.map((stock, idx) => (
+              {stocks.map((stock) => (
                 <tr
                   key={stock.symbol}
                   className={cn(
@@ -56,18 +46,11 @@ export function LimitPoolTable({ stocks, type }: LimitPoolTableProps) {
                   <td className="px-3 py-2 text-right">
                     <ChangeBadge value={stock.changePercent} />
                   </td>
-                  <td className="px-3 py-2 text-center">
-                    {stock.limitTimes > 1 && (
-                      <span className="inline-block px-[6px] py-[1px] rounded bg-brand-orange-light text-brand-orange font-bold text-[10px]">
-                        {stock.limitTimes}板
-                      </span>
-                    )}
+                  <td className="px-3 py-2 text-right font-mono text-text-2">
+                    {stock.amountDisplay}
                   </td>
-                  <td className="px-3 py-2 font-mono text-text-3 text-[10px]">
-                    {stock.firstLimitTime}
-                  </td>
-                  <td className="px-3 py-2 text-text-2 truncate max-w-[200px]">
-                    {stock.reason}
+                  <td className="px-3 py-2 text-right font-mono text-text-2">
+                    {stock.turnoverRate.toFixed(2)}%
                   </td>
                 </tr>
               ))}

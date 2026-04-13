@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, JetBrains_Mono, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { QueryProvider } from "@/components/query-provider";
 import { Dock } from "@/components/layout/Dock";
 
 const dmSans = DM_Sans({
@@ -38,8 +39,10 @@ export default function RootLayout({
         className={`${dmSans.variable} ${jetbrainsMono.variable} ${notoSansSC.variable} antialiased`}
       >
         <ThemeProvider>
-          {children}
-          <Dock />
+          <QueryProvider>
+            {children}
+            <Dock />
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

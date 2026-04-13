@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { DataSourceBadge } from '@/components/ui/DataSourceBadge'
 
 const NAV_ITEMS = [
   { href: '/', icon: TrendingUp, label: '个股' },
@@ -178,8 +179,9 @@ export function Dock() {
         {/* Divider */}
         <div className="w-px h-5 bg-border-1 mx-1" />
 
-        {/* Market status */}
+        {/* Market status + Data source */}
         <MarketBadge />
+        <DataSourceBadge />
 
         {/* Refresh */}
         <button className="p-1.5 rounded-xl text-text-3 hover:text-text-1 hover:bg-bg-2 transition-all" title="刷新">

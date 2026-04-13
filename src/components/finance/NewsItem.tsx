@@ -10,7 +10,7 @@ interface NewsItemData {
   summary: string
   source: string
   time: string
-  tags: string[]
+  tags?: string[]
 }
 
 interface NewsItemProps {
@@ -38,7 +38,7 @@ export function NewsItem({ news, onClick }: NewsItemProps) {
             <span>{news.source}</span>
             <span>·</span>
             <span>{news.time}</span>
-            {news.tags.length > 0 && (
+            {news.tags && news.tags.length > 0 && (
               <>
                 <span>·</span>
                 <div className="flex gap-1">

@@ -8,73 +8,24 @@ import { Tabs } from '@/components/ui/Tabs'
 import { Button } from '@/components/ui/Button'
 import { useState } from 'react'
 import { BarChart3, TrendingUp } from 'lucide-react'
-
-// Mock data
-const mockQuote = {
-  symbol: 'sh600519',
-  name: '贵州茅台',
-  price: 1678.50,
-  change: 23.80,
-  changePercent: 1.44,
-  open: 1655.00,
-  high: 1682.00,
-  low: 1650.00,
-  volume: 1234567,
-  amount: 2056789000,
-  turnoverRate: 0.98,
-  peRatio: 32.5,
-}
-
-const mockKlineData = Array.from({ length: 60 }, (_, i) => {
-  const date = new Date()
-  date.setDate(date.getDate() - (60 - i))
-  const base = 1650 + Math.random() * 50
-  return {
-    date: date.toISOString().split('T')[0],
-    open: base,
-    close: base + (Math.random() - 0.5) * 20,
-    high: base + Math.random() * 30,
-    low: base - Math.random() * 20,
-    volume: Math.floor(Math.random() * 2000000),
-  }
-})
-
-const mockNews = [
-  {
-    id: '1',
-    title: '贵州茅台发布2024年度业绩快报，营收同比增长12.3%',
-    summary: '公司实现营业收入1456亿元，净利润达到728亿元，超市场预期。',
-    source: '证券时报',
-    time: '10:32',
-    tags: ['业绩', '白酒'],
-  },
-  {
-    id: '2',
-    title: 'A股三大指数集体收涨，沪指涨0.8%站上3100点',
-    summary: '两市成交额突破8000亿元，北向资金净流入82亿元。',
-    source: '财联社',
-    time: '09:15',
-    tags: ['大盘'],
-  },
-  {
-    id: '3',
-    title: '科技板块持续活跃，AI算力概念股掀涨停潮',
-    summary: '多只AI算力概念股涨停，板块整体涨幅超过5%。',
-    source: '东方财富',
-    time: '08:45',
-    tags: ['科技', 'AI'],
-  },
-]
+import { useQuote } from '@/hooks/use-quote'
+import { useKline } from '@/hooks/use-kline'
+import { useNews } from '@/hooks/use-news'
 
 export default function Home() {
   const [period, setPeriod] = useState('day')
   const [adjust, setAdjust] = useState('qfq')
 
+  const symbol = 'sh600519'
+  const quote = useQuote(symbol)
+  const kline = useKline(symbol, period, adjust)
+  const news = useNews()
+
   return (
     <main className="min-h-screen p-6 pb-24">
       <div className="max-w-[1400px] mx-auto space-y-4 animate-fade-up">
             {/* Quote Card */}
-            <QuoteCard {...mockQuote} />
+            <QuoteCard {...quote.data} />
 
             {/* Chart + News */}
             <div className="grid grid-cols-[1fr_280px] gap-4">
@@ -107,12 +58,12 @@ export default function Home() {
                   }
                 />
                 <CardBody>
-                  <KLineChart data={mockKlineData} />
+                  <KLineChart data={kline.data} />
                 </CardBody>
               </Card>
 
               {/* News */}
-              <NewsList news={mockNews} />
+              <NewsList news={news.data} />
             </div>
 
             {/* Analysis Cards */}
