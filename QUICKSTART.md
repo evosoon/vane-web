@@ -15,7 +15,6 @@ npm run dev
 
 ```bash
 # 终端 1 — 启动后端
-cd ../vane-data && bun run dev
 
 # 终端 2 — 启动前端
 npm install
